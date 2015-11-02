@@ -51,9 +51,10 @@ CURRENT_BG='NONE'
 # Takes two arguments, background and foreground. Both can be omitted,
 # rendering default background/foreground.
 prompt_segment() {
-  local bg fg
+  local bg fg sep
   [[ -n $1 ]] && bg="%K{$1}" || bg="%k"
   [[ -n $2 ]] && fg="%F{$2}" || fg="%f"
+
   if [[ $CURRENT_BG != 'NONE' && $1 != $CURRENT_BG ]]; then
     echo -n " %{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%} "
   else
@@ -62,6 +63,21 @@ prompt_segment() {
   CURRENT_BG=$1
   [[ -n $3 ]] && echo -n $3
 }
+
+rprompt_segment() {
+  local bg fg sep
+  [[ -n $1 ]] && bg="%K{$1}" || bg="%k"
+  [[ -n $2 ]] && fg="%F{$2}" || fg="%f"
+
+  if [[ $1 != $CURRENT_BG ]]; then
+    echo -n " %{%k%F{$1}%}$SEGMENT_RSEPARATOR%{$bg$fg%} "
+  else
+    echo -n "%{$bg%}%{$fg%} "
+  fi
+  CURRENT_BG=$1
+  [[ -n $3 ]] && echo -n $3
+}
+
 
 # End the prompt, closing any open segments
 prompt_end() {
@@ -73,6 +89,7 @@ prompt_end() {
   echo -n "%{%f%}"
   CURRENT_BG=''
 }
+
 
 ### Prompt components
 # Each component will draw itself, and hide itself if no information needs to be shown
@@ -201,4 +218,10 @@ build_prompt() {
   prompt_end
 }
 
+build_rprompt() {
+  rprompt_segment blue black "%D{%H:%M:%S}"
+}
+
 PROMPT='%{%f%b%k%}$(build_prompt) '
+CURRENT_BG='NONE'
+RPROMPT='$(build_rprompt)'
